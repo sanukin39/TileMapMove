@@ -7,7 +7,7 @@ public class Panel : MonoBehaviour {
 	[SerializeField]
 	Text text;
 	public int moveCost;
-	public bool marked;
+	public int maxMove;
 
 	public void SetNum(int n){
 		text.text = n.ToString();
@@ -20,8 +20,11 @@ public class Panel : MonoBehaviour {
 		text.color = Color.red;
 	}
 
-	public void Mark(){
+	public bool Mark(int move){
+		if (move < maxMove)
+			return false;
 		GetComponent<Image>().color = Color.gray;
-		marked = true;
+		maxMove = move;
+		return true;
 	}
 }

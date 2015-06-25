@@ -43,6 +43,7 @@ public class MapBuilder : MonoBehaviour {
 			for(int j = 0; j < Height; j++){
 				var p = map[i, j];
 				p.moveCost = Random.Range(1, 4);
+				p.maxMove = 0;
 				p.SetNum(p.moveCost);
 			}
 		}
@@ -51,23 +52,15 @@ public class MapBuilder : MonoBehaviour {
 		var px = Random.Range(0, Width);
 		var py = Random.Range(0, Height);
 		map[px, py].SetPlayer();
-		map[px, py].Mark();
+		map[px, py].Mark(cost);
 		
-		Search(px - 1, py, cost, 1);
-		Search(px, py - 1, cost, 2);
-		Search(px + 1, py, cost, 3);
-		Search(px, py + 1, cost, 4);
+		Search(px - 1, py, cost);
+		Search(px, py - 1, cost);
+		Search(px + 1, py, cost);
+		Search(px, py + 1, cost);
 	}
 
-	GameObject CreatePanel(Vector3 pos){
-		var go = Instantiate(panelPrefab);
-		go.transform.SetParent(mapRoot.transform);
-		go.transform.localPosition = pos;
-		go.transform.localScale = Vector3.one;
-		return go;
-	}
-
-	void Search(int x, int y, int cost, int di){
+	void Search(int x, int y, int cost){
 		if(x < 0 || y < 0 || x >= Width || y >= Height)
 			return;
 
@@ -76,15 +69,23 @@ public class MapBuilder : MonoBehaviour {
 			return;
 		}
 
+		if (!p.Mark (cost)) {
+			return;
+		}
+
 		var restCost = cost - p.moveCost;
-		p.Mark();
-		if(di != 3)
-			Search(x - 1, y, restCost, 1);
-		if(di != 4)
-			Search(x, y - 1, restCost, 2);
-		if(di != 1)
-			Search(x + 1, y, restCost, 3);
-		if(di != 2)
-			Search(x, y + 1, restCost, 4);
+		
+		Search(x - 1, y, restCost);
+		Search(x, y - 1, restCost);
+		Search(x + 1, y, restCost);
+		Search(x, y + 1, restCost);
+	}
+
+	GameObject CreatePanel(Vector3 pos){
+		var go = Instantiate(panelPrefab);
+		go.transform.SetParent(mapRoot.transform);
+		go.transform.localPosition = pos;
+		go.transform.localScale = Vector3.one;
+		return go;
 	}
 }
