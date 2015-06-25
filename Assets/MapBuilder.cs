@@ -16,6 +16,18 @@ public class MapBuilder : MonoBehaviour {
 	const int Height = 10;
 	const float displayRatio = 1.77f;
 	Panel[,] map;
+	IList<Vector2> directions = new List<Vector2>(){
+		Vector2.up,
+		Vector2.left,
+		Vector2.down,
+		Vector2.right,
+		// 斜め移動対応時
+		/*
+		new Vector2(1, 1),
+		new Vector2(-1, -1),
+		new Vector2(-1, 1),
+		new Vector2(1, -1) */
+	};
 	
 	void Start () {
 		map = new Panel[Width, Height];
@@ -51,34 +63,26 @@ public class MapBuilder : MonoBehaviour {
 		
 		var px = Random.Range(0, Width);
 		var py = Random.Range(0, Height);
-		map[px, py].SetPlayer();
-		map[px, py].Mark(cost);
-		
-		Search(px - 1, py, cost);
-		Search(px, py - 1, cost);
-		Search(px + 1, py, cost);
-		Search(px, py + 1, cost);
+		var pp = map[px, py];
+		pp.SetPlayer();
+		Search(px, py, cost + pp.moveCost);
 	}
 
 	void Search(int x, int y, int cost){
-		if(x < 0 || y < 0 || x >= Width || y >= Height)
-			return;
-
-		var p = map[x, y];
-		if(p.moveCost > cost){
+		if (x < 0 || y < 0 || x >= Width || y >= Height) {
 			return;
 		}
 
-		if (!p.Mark (cost)) {
+		var p = map[x, y];
+		if(p.moveCost > cost || !p.Mark(cost)){
 			return;
 		}
 
 		var restCost = cost - p.moveCost;
-		
-		Search(x - 1, y, restCost);
-		Search(x, y - 1, restCost);
-		Search(x + 1, y, restCost);
-		Search(x, y + 1, restCost);
+
+		foreach (var d in directions) {
+			Search ((int)(x + d.x), (int)(y + d.y), restCost);
+		}
 	}
 
 	GameObject CreatePanel(Vector3 pos){
